@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 360" role="img" aria-label="shioriのアーキテクチャ図">
+  <title>shioriのアーキテクチャ。入力から折り返し・SVG生成・書き出しまでの流れ。</title>
+  <style>
+    svg { --paper: #f2f2f0; --box: #fdfdfc; --ink: #26262a; --muted: #6e6e74; --line: #b4b4b0; --accent: #5b4b8a; }
+    @media (prefers-color-scheme: dark) {
+      svg { --paper: #17171a; --box: #1f1f24; --ink: #e8e8e4; --muted: #9b9ba2; --line: #4c4c52; --accent: #a795d8; }
+    }
+    text { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; fill: var(--ink); }
+    .name { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; font-weight: 600; }
+    .sub { font-size: 11px; fill: var(--muted); }
+    .label { font-size: 10px; fill: var(--muted); }
+    .box { fill: var(--box); stroke: var(--line); }
+    .ext { fill: none; stroke: var(--muted); stroke-dasharray: 5 4; }
+    .flow { fill: none; stroke: var(--accent); stroke-width: 1.5; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L8 4L0 8z" fill="var(--accent)"/>
+    </marker>
+  </defs>
+
+  <rect width="780" height="360" fill="var(--paper)"/>
+  <text x="40" y="46" font-size="16" font-weight="700">shiori のアーキテクチャ</text>
+
+  <rect class="box" x="40" y="120" width="170" height="120" rx="10"/>
+  <text x="125" y="166" text-anchor="middle" font-size="14" font-weight="600">フォームUI</text>
+  <text x="125" y="190" text-anchor="middle" class="name">app.ts</text>
+  <text x="125" y="212" text-anchor="middle" class="sub">入力・プレビュー・書き出し</text>
+
+  <rect class="box" x="280" y="90" width="190" height="58" rx="8"/>
+  <text x="296" y="114" class="name">wrap.ts</text>
+  <text x="296" y="134" class="sub">禁則つき折り返し・縦書き字形</text>
+
+  <rect class="box" x="280" y="212" width="190" height="58" rx="8"/>
+  <text x="296" y="236" class="name">palettes.ts</text>
+  <text x="296" y="256" class="sub">6種の配色定義</text>
+
+  <rect class="box" x="540" y="150" width="180" height="62" rx="8"/>
+  <text x="556" y="176" class="name">card.ts</text>
+  <text x="556" y="196" class="sub">採寸とSVG組み立て</text>
+
+  <rect class="ext" x="540" y="280" width="180" height="50" rx="8"/>
+  <text x="630" y="302" text-anchor="middle" class="name">SVG / PNG</text>
+  <text x="630" y="320" text-anchor="middle" class="sub">ダウンロード・コピー</text>
+
+  <path class="flow" d="M210 180 C 320 180 420 181 538 181" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+  <text x="374" y="172" text-anchor="middle" class="label">CardSpec / SVG文字列</text>
+  <path class="flow" d="M470 119 C 500 119 516 150 540 160" marker-start="url(#arrow)"/>
+  <text x="512" y="124" class="label">行分割</text>
+  <path class="flow" d="M470 241 C 500 241 516 212 540 202" marker-start="url(#arrow)"/>
+  <text x="512" y="248" class="label">配色</text>
+  <path class="flow" d="M630 212 V 278" marker-end="url(#arrow)"/>
+</svg>
