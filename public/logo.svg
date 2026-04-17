@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="shioriのロゴ">
+  <title>shiori</title>
+  <style>
+    :root { --ink: #3d3d44; --accent: #5b4b8a; }
+    @media (prefers-color-scheme: dark) {
+      :root { --ink: #d2d2d8; --accent: #a795d8; }
+    }
+  </style>
+  <rect x="12" y="6" width="40" height="52" rx="4" fill="none" stroke="var(--ink)" stroke-width="3"/>
+  <path d="M40 6v22l-6-5-6 5V6" fill="var(--accent)"/>
+  <path d="M20 40h24M20 48h16" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" opacity="0.45"/>
+</svg>
