@@ -1,0 +1,83 @@
+import { describe, expect, it } from 'vitest';
+import type { CardSpec } from './card';
+import { buildCard, SIZES } from './card';
+import { PALETTES } from './palettes';
+
+const base: CardSpec = {
+  quote: '智に働けば角が立つ。情に棹させば流される。',
+  title: '草枕',
+  author: '夏目漱石',
+  layout: 'horizontal',
+  size: 'ogp',
+  paletteId: 'kinari',
+  font: 'mincho',
+};
+
+function fontSizeOf(svg: string): number {
+  const m = /<text[^>]*font-size="(\d+)"/.exec(svg);
+  return m === null ? 0 : Number(m[1]);
+}
+
+describe('buildCard', () => {
+  it('サイズ指定どおりの寸法になる', () => {
+    for (const size of Object.keys(SIZES) as (keyof typeof SIZES)[]) {
+      const svg = buildCard({ ...base, size });
+      expect(svg).toContain(`viewBox="0 0 ${SIZES[size].width} ${SIZES[size].height}"`);
+    }
+  });
+
+  it('パレットの背景色と文字色を使う', () => {
+    const svg = buildCard({ ...base, paletteId: 'ai' });
+    const ai = PALETTES.find((p) => p.id === 'ai');
+    expect(svg).toContain(`fill="${ai?.bg}"`);
+    expect(svg).toContain(`fill="${ai?.fg}"`);
+  });
+
+  it('未知のパレットIDは先頭のパレットへ落ちる', () => {
+    const svg = buildCard({ ...base, paletteId: 'nothing' });
+    expect(svg).toContain(`fill="${PALETTES[0]?.bg}"`);
+  });
+
+  it('引用と出典をエスケープして含める', () => {
+    const svg = buildCard({
+      ...base,
+      quote: '<b>太字</b>という話',
+      title: 'A&B',
+    });
+    expect(svg).not.toContain('<b>');
+    expect(svg).toContain('&lt;b&gt;');
+    expect(svg).toContain('A&amp;B');
+  });
+
+  it('長い引用ほど小さい字で組む', () => {
+    const short = buildCard(base);
+    const long = buildCard({ ...base, quote: '長い文章。'.repeat(40) });
+    expect(fontSizeOf(long)).toBeLessThan(fontSizeOf(short));
+  });
+
+  it('縦書きでは1字ずつtspanに分解する', () => {
+    const svg = buildCard({ ...base, layout: 'vertical', quote: 'あいう' });
+    expect(svg.match(/<tspan/g)).toHaveLength(3);
+  });
+
+  it('縦書きでは句読点が縦書き字形になる', () => {
+    const svg = buildCard({ ...base, layout: 'vertical', quote: 'はい。' });
+    expect(svg).toContain('︒');
+    expect(svg).not.toContain('>。<');
+  });
+
+  it('出典が空なら出典行を出さない', () => {
+    const svg = buildCard({ ...base, title: '', author: '' });
+    expect(svg).not.toContain('―');
+  });
+
+  it('書名だけ・著者だけでも出典行が成立する', () => {
+    expect(buildCard({ ...base, author: '' })).toContain('『草枕』');
+    expect(buildCard({ ...base, title: '' })).toContain('夏目漱石');
+  });
+
+  it('title要素に引用の冒頭を入れる', () => {
+    const svg = buildCard(base);
+    expect(svg).toContain('<title>引用カード: 智に働けば角が立つ。');
+  });
+});
