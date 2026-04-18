@@ -1,12 +1,14 @@
 // 引用カードのSVG生成。文字数とカード寸法から収まるフォントサイズを
 // 探し、横書き・縦書きそれぞれの組みでSVG文字列を返す純粋関数。
 
-import { paletteById } from './palettes';
+import type { Palette } from './palettes';
+import { paletteById, PALETTES } from './palettes';
 import { toVerticalForm, wrapText } from './wrap';
 
 export type CardLayout = 'horizontal' | 'vertical';
 export type CardSize = 'ogp' | 'square' | 'portrait';
 export type CardFont = 'mincho' | 'gothic';
+export type CardFrame = 'kagi' | 'rule' | 'none';
 
 export interface CardSpec {
   quote: string;
@@ -16,6 +18,7 @@ export interface CardSpec {
   size: CardSize;
   paletteId: string;
   font: CardFont;
+  frame: CardFrame;
 }
 
 export interface SizeDef {
@@ -30,10 +33,49 @@ export const SIZES: Record<CardSize, SizeDef> = {
   portrait: { width: 1080, height: 1350, label: '縦長 1080x1350' },
 };
 
+export const FRAMES: Record<CardFrame, string> = {
+  kagi: '鉤括弧',
+  rule: '罫囲み',
+  none: '装飾なし',
+};
+
 const FONT_STACKS: Record<CardFont, string> = {
   mincho: "'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif",
   gothic: "'Hiragino Kaku Gothic ProN','Yu Gothic','Noto Sans JP',sans-serif",
 };
+
+export const DEFAULT_SPEC: CardSpec = {
+  quote:
+    '智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい。',
+  title: '草枕',
+  author: '夏目漱石',
+  layout: 'horizontal',
+  size: 'ogp',
+  paletteId: 'kinari',
+  font: 'mincho',
+  frame: 'kagi',
+};
+
+// localStorageやURLから来た値はそのまま信じない。フィールドごとに
+// 妥当性を確かめ、壊れた部分だけ既定値へ落とす。
+export function normalizeSpec(value: unknown): CardSpec {
+  if (typeof value !== 'object' || value === null) return { ...DEFAULT_SPEC };
+  const v = value as Record<string, unknown>;
+  const str = (x: unknown, fallback: string) => (typeof x === 'string' ? x : fallback);
+  return {
+    quote: str(v.quote, DEFAULT_SPEC.quote),
+    title: str(v.title, ''),
+    author: str(v.author, ''),
+    layout: v.layout === 'vertical' ? 'vertical' : 'horizontal',
+    size: v.size === 'square' || v.size === 'portrait' ? v.size : 'ogp',
+    paletteId:
+      typeof v.paletteId === 'string' && PALETTES.some((p) => p.id === v.paletteId)
+        ? v.paletteId
+        : DEFAULT_SPEC.paletteId,
+    font: v.font === 'gothic' ? 'gothic' : 'mincho',
+    frame: v.frame === 'rule' || v.frame === 'none' ? v.frame : 'kagi',
+  };
+}
 
 export function escapeXml(s: string): string {
   return s
@@ -82,7 +124,7 @@ function attribution(title: string, author: string): string {
 }
 
 // 鉤括弧モチーフの飾り罫。左上と右下に置く。
-function corners(
+function kagiCorners(
   x0: number,
   y0: number,
   x1: number,
@@ -94,6 +136,35 @@ function corners(
     `<path d="M ${x0} ${y0 + arm} V ${y0} H ${x0 + arm}" fill="none" stroke="${color}" stroke-width="6" aria-hidden="true"/>` +
     `<path d="M ${x1} ${y1 - arm} V ${y1} H ${x1 - arm}" fill="none" stroke="${color}" stroke-width="6" aria-hidden="true"/>`
   );
+}
+
+// 罫囲み。地になじむ淡い縁取りに、アクセントの内罫を1本添える。
+function ruleFrame(
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  line: string,
+  accent: string,
+): string {
+  const w = x1 - x0;
+  const h = y1 - y0;
+  const inset = 10;
+  return (
+    `<rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="none" stroke="${line}" stroke-width="2" aria-hidden="true"/>` +
+    `<rect x="${x0 + inset}" y="${y0 + inset}" width="${w - inset * 2}" height="${h - inset * 2}" fill="none" stroke="${accent}" stroke-width="1.5" aria-hidden="true"/>`
+  );
+}
+
+function frameMarks(spec: CardSpec, width: number, height: number, palette: Palette): string {
+  if (spec.frame === 'none') return '';
+  const mx = Math.round(width * 0.07);
+  const my = Math.round(height * 0.1);
+  if (spec.frame === 'rule') {
+    return ruleFrame(mx, my, width - mx, height - my, palette.line, palette.accent);
+  }
+  const arm = Math.round(Math.min(width, height) * 0.05);
+  return kagiCorners(mx, my, width - mx, height - my, arm, palette.accent);
 }
 
 function horizontalBody(spec: CardSpec, width: number, height: number, fg: string): string {
@@ -163,9 +234,6 @@ export function buildCard(spec: CardSpec): string {
   const { width, height } = SIZES[spec.size];
   const palette = paletteById(spec.paletteId);
   const font = FONT_STACKS[spec.font];
-  const mx = Math.round(width * 0.07);
-  const my = Math.round(height * 0.1);
-  const arm = Math.round(Math.min(width, height) * 0.05);
 
   const body =
     spec.layout === 'vertical'
@@ -184,7 +252,7 @@ export function buildCard(spec: CardSpec): string {
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="${escapeXml(`引用カード: ${excerpt}`)}">` +
     `<title>${escapeXml(`引用カード: ${excerpt}`)}</title>` +
     `<rect width="${width}" height="${height}" fill="${palette.bg}"/>` +
-    corners(mx, my, width - mx, height - my, arm, palette.accent) +
+    frameMarks(spec, width, height, palette) +
     `<g font-family="${escapeXml(font)}">` +
     body +
     attr +
