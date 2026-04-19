@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { CardSpec } from './card';
-import { buildCard, SIZES } from './card';
+import { buildCard, DEFAULT_SPEC, normalizeSpec, SIZES } from './card';
 import { PALETTES } from './palettes';
 
 const base: CardSpec = {
@@ -11,6 +11,7 @@ const base: CardSpec = {
   size: 'ogp',
   paletteId: 'kinari',
   font: 'mincho',
+  frame: 'kagi',
 };
 
 function fontSizeOf(svg: string): number {
@@ -79,5 +80,59 @@ describe('buildCard', () => {
   it('title要素に引用の冒頭を入れる', () => {
     const svg = buildCard(base);
     expect(svg).toContain('<title>引用カード: 智に働けば角が立つ。');
+  });
+});
+
+describe('buildCard の罫(frame)', () => {
+  it('鉤括弧は2本のpathを引く', () => {
+    const svg = buildCard({ ...base, frame: 'kagi' });
+    expect(svg.match(/<path/g)).toHaveLength(2);
+  });
+
+  it('罫囲みは内外2枚のrectを足す', () => {
+    const card = buildCard({ ...base, frame: 'rule' });
+    const bg = buildCard({ ...base, frame: 'none' });
+    // 背景の1枚に対し、罫囲みでは枠の2枚が増える
+    expect((card.match(/<rect/g) ?? []).length).toBe((bg.match(/<rect/g) ?? []).length + 2);
+  });
+
+  it('装飾なしは飾り罫を一切引かない', () => {
+    const svg = buildCard({ ...base, frame: 'none' });
+    expect(svg).not.toContain('<path');
+    expect(svg.match(/<rect/g)).toHaveLength(1);
+  });
+});
+
+describe('normalizeSpec', () => {
+  it('オブジェクトでない値は既定へ落とす', () => {
+    expect(normalizeSpec(null)).toEqual(DEFAULT_SPEC);
+    expect(normalizeSpec('text')).toEqual(DEFAULT_SPEC);
+  });
+
+  it('空オブジェクトは引用を既定にし、出典は空にする', () => {
+    expect(normalizeSpec({})).toEqual({ ...DEFAULT_SPEC, title: '', author: '' });
+  });
+
+  it('妥当なフィールドは保持し不正値だけ直す', () => {
+    const spec = normalizeSpec({
+      quote: '本の話',
+      title: '',
+      author: '誰か',
+      layout: 'vertical',
+      size: 'square',
+      paletteId: 'ai',
+      font: 'gothic',
+      frame: 'bogus',
+    });
+    expect(spec.quote).toBe('本の話');
+    expect(spec.layout).toBe('vertical');
+    expect(spec.size).toBe('square');
+    expect(spec.paletteId).toBe('ai');
+    expect(spec.font).toBe('gothic');
+    expect(spec.frame).toBe('kagi');
+  });
+
+  it('存在しないパレットIDは既定へ戻す', () => {
+    expect(normalizeSpec({ paletteId: 'none-such' }).paletteId).toBe(DEFAULT_SPEC.paletteId);
   });
 });
