@@ -351,10 +351,28 @@ export function mountApp(root: HTMLElement, storage: Storage): void {
     });
   }
 
+  const prefersReduce = () =>
+    typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // 配色や例文の切り替えなど、離散的な変更のときだけそっと差し替える。
+  // 入力中の連続更新には掛けない(ちらつきになるため)。
+  function flash(): void {
+    const svg = preview.firstElementChild;
+    if (prefersReduce() || svg === null || typeof svg.animate !== 'function') return;
+    svg.animate(
+      [
+        { opacity: 0, transform: 'translateY(4px)' },
+        { opacity: 1, transform: 'none' },
+      ],
+      { duration: 280, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' },
+    );
+  }
+
   function update(next: Partial<CardSpec>): void {
     spec = { ...spec, ...next };
     syncForm();
     render();
+    flash();
   }
 
   function readForm(): void {
