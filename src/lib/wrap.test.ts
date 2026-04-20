@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { toVerticalForm, wrapText } from './wrap';
+import { splitCells, toVerticalForm, wrapText } from './wrap';
 
 describe('wrapText', () => {
   it('指定字数で折り返す', () => {
@@ -59,5 +59,23 @@ describe('toVerticalForm', () => {
   it('それ以外の文字はそのまま返す', () => {
     expect(toVerticalForm('本')).toBe('本');
     expect(toVerticalForm('A')).toBe('A');
+  });
+});
+
+describe('splitCells', () => {
+  it('通常の文字は1字ずつのセルにする', () => {
+    expect(splitCells('あいう')).toEqual(['あ', 'い', 'う']);
+  });
+
+  it('半角数字は2桁までを縦中横の1セルにまとめる', () => {
+    expect(splitCells('は12時')).toEqual(['は', '12', '時']);
+  });
+
+  it('3桁以上は2桁ずつに割る', () => {
+    expect(splitCells('西暦2026年')).toEqual(['西', '暦', '20', '26', '年']);
+  });
+
+  it('奇数桁は最後の1桁が単独セルになる', () => {
+    expect(splitCells('第123条')).toEqual(['第', '12', '3', '条']);
   });
 });
