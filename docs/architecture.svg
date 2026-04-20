@@ -1,53 +1,77 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 360" role="img" aria-label="shioriのアーキテクチャ図">
-  <title>shioriのアーキテクチャ。入力から折り返し・SVG生成・書き出しまでの流れ。</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 400" role="img" aria-label="shioriのアーキテクチャ図">
+  <title>shioriのアーキテクチャ。入力から折り返し・SVG生成・書き出しと、保存・共有までの流れ。</title>
   <style>
-    svg { --paper: #f2f2f0; --box: #fdfdfc; --ink: #26262a; --muted: #6e6e74; --line: #b4b4b0; --accent: #5b4b8a; }
+    svg { --paper: #f4f1e9; --box: #faf8f2; --ink: #232019; --muted: #726a5b; --line: #d4c9b3; --accent: #8a2b2e; }
     @media (prefers-color-scheme: dark) {
-      svg { --paper: #17171a; --box: #1f1f24; --ink: #e8e8e4; --muted: #9b9ba2; --line: #4c4c52; --accent: #a795d8; }
+      svg { --paper: #1a1815; --box: #211e19; --ink: #ece5d7; --muted: #968c7b; --line: #453f34; --accent: #d2747a; }
     }
     text { font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; fill: var(--ink); }
-    .name { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; font-weight: 600; }
-    .sub { font-size: 11px; fill: var(--muted); }
-    .label { font-size: 10px; fill: var(--muted); }
+    .title { font-family: "Hiragino Mincho ProN", "Yu Mincho", serif; font-size: 17px; }
+    .name { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; font-weight: 600; }
+    .sub { font-size: 10.5px; fill: var(--muted); }
+    .label { font-size: 10px; fill: var(--muted); letter-spacing: 0.04em; }
     .box { fill: var(--box); stroke: var(--line); }
     .ext { fill: none; stroke: var(--muted); stroke-dasharray: 5 4; }
-    .flow { fill: none; stroke: var(--accent); stroke-width: 1.5; }
+    .flow { fill: none; stroke: var(--accent); stroke-width: 1.4; }
   </style>
   <defs>
-    <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <marker id="arrow" viewBox="0 0 8 8" refX="6.5" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
       <path d="M0 0L8 4L0 8z" fill="var(--accent)"/>
     </marker>
   </defs>
 
-  <rect width="780" height="360" fill="var(--paper)"/>
-  <text x="40" y="46" font-size="16" font-weight="700">shiori のアーキテクチャ</text>
+  <rect width="820" height="400" fill="var(--paper)"/>
+  <text x="40" y="48" class="title">shiori のアーキテクチャ</text>
+  <line x1="40" y1="64" x2="780" y2="64" stroke="var(--line)"/>
 
-  <rect class="box" x="40" y="120" width="170" height="120" rx="10"/>
-  <text x="125" y="166" text-anchor="middle" font-size="14" font-weight="600">フォームUI</text>
-  <text x="125" y="190" text-anchor="middle" class="name">app.ts</text>
-  <text x="125" y="212" text-anchor="middle" class="sub">入力・プレビュー・書き出し</text>
+  <!-- 入力 -->
+  <rect class="box" x="40" y="150" width="172" height="118" rx="6"/>
+  <text x="126" y="196" text-anchor="middle" font-size="13" font-weight="600">フォームUI</text>
+  <text x="126" y="218" text-anchor="middle" class="name">app.ts</text>
+  <text x="126" y="238" text-anchor="middle" class="sub">プレビュー・操作</text>
 
-  <rect class="box" x="280" y="90" width="190" height="58" rx="8"/>
-  <text x="296" y="114" class="name">wrap.ts</text>
-  <text x="296" y="134" class="sub">禁則つき折り返し・縦書き字形</text>
+  <!-- 永続化・共有(外部) -->
+  <rect class="ext" x="40" y="96" width="172" height="34" rx="6"/>
+  <text x="126" y="117" text-anchor="middle" class="sub">localStorage / URLハッシュ</text>
 
-  <rect class="box" x="280" y="212" width="190" height="58" rx="8"/>
-  <text x="296" y="236" class="name">palettes.ts</text>
-  <text x="296" y="256" class="sub">6種の配色定義</text>
+  <!-- 組版ライブラリ -->
+  <rect class="box" x="288" y="100" width="190" height="50" rx="6"/>
+  <text x="304" y="122" class="name">wrap.ts</text>
+  <text x="304" y="140" class="sub">禁則つき折り返し・縦書き字形</text>
 
-  <rect class="box" x="540" y="150" width="180" height="62" rx="8"/>
-  <text x="556" y="176" class="name">card.ts</text>
-  <text x="556" y="196" class="sub">採寸とSVG組み立て</text>
+  <rect class="box" x="288" y="166" width="190" height="50" rx="6"/>
+  <text x="304" y="188" class="name">palettes.ts</text>
+  <text x="304" y="206" class="sub">9種の和色配色</text>
 
-  <rect class="ext" x="540" y="280" width="180" height="50" rx="8"/>
-  <text x="630" y="302" text-anchor="middle" class="name">SVG / PNG</text>
-  <text x="630" y="320" text-anchor="middle" class="sub">ダウンロード・コピー</text>
+  <rect class="box" x="288" y="232" width="190" height="50" rx="6"/>
+  <text x="304" y="254" class="name">theme.ts / share.ts / samples.ts</text>
+  <text x="304" y="272" class="sub">テーマ解決・URL共有・例文</text>
 
-  <path class="flow" d="M210 180 C 320 180 420 181 538 181" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
-  <text x="374" y="172" text-anchor="middle" class="label">CardSpec / SVG文字列</text>
-  <path class="flow" d="M470 119 C 500 119 516 150 540 160" marker-start="url(#arrow)"/>
-  <text x="512" y="124" class="label">行分割</text>
-  <path class="flow" d="M470 241 C 500 241 516 212 540 202" marker-start="url(#arrow)"/>
-  <text x="512" y="248" class="label">配色</text>
-  <path class="flow" d="M630 212 V 278" marker-end="url(#arrow)"/>
+  <!-- 生成 -->
+  <rect class="box" x="556" y="150" width="186" height="68" rx="6"/>
+  <text x="572" y="178" class="name">card.ts</text>
+  <text x="572" y="198" class="sub">採寸・罫・SVG組み立て</text>
+
+  <!-- 出力 -->
+  <rect class="ext" x="556" y="282" width="186" height="50" rx="6"/>
+  <text x="649" y="304" text-anchor="middle" class="name">SVG / PNG</text>
+  <text x="649" y="322" text-anchor="middle" class="sub">ダウンロード・コピー</text>
+
+  <!-- フロー -->
+  <path class="flow" d="M212 117 H 232 V 196 H 285" marker-end="url(#arrow)"/>
+  <path class="flow" d="M126 150 V 130" marker-end="url(#arrow)"/>
+  <text x="150" y="146" class="label">保存・復元</text>
+
+  <path class="flow" d="M212 200 H 285" marker-end="url(#arrow)"/>
+  <text x="236" y="192" text-anchor="middle" class="label">CardSpec</text>
+
+  <path class="flow" d="M478 125 C 516 125 524 160 553 168" marker-end="url(#arrow)"/>
+  <text x="520" y="130" class="label">行分割</text>
+  <path class="flow" d="M478 191 H 553" marker-end="url(#arrow)"/>
+  <text x="516" y="184" class="label">配色</text>
+
+  <path class="flow" d="M649 218 V 280" marker-end="url(#arrow)"/>
+  <text x="660" y="254" class="label">SVG文字列</text>
+
+  <path class="flow" d="M556 184 C 360 184 300 184 212 210" marker-start="url(#arrow)"/>
 </svg>
