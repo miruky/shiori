@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="shioriのロゴ">
   <title>shiori</title>
   <style>
-    :root { --ink: #3d3d44; --accent: #5b4b8a; }
+    :root { --ink: #3a352c; --accent: #8a2b2e; }
     @media (prefers-color-scheme: dark) {
-      :root { --ink: #d2d2d8; --accent: #a795d8; }
+      :root { --ink: #cfc7b6; --accent: #d2747a; }
     }
   </style>
   <rect x="12" y="6" width="40" height="52" rx="4" fill="none" stroke="var(--ink)" stroke-width="3"/>
