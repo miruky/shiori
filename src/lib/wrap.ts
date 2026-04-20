@@ -85,3 +85,26 @@ const VERTICAL_FORMS: Record<string, string> = {
 export function toVerticalForm(ch: string): string {
   return VERTICAL_FORMS[ch] ?? ch;
 }
+
+// 縦書きの一行を、縦に積む「セル」へ分ける。半角数字は2桁までを
+// 一つのセルにまとめ、縦中横(その桁だけ横に寝かせる組み)にする。
+// それ以外の文字は1字ずつのセルにする。
+export function splitCells(line: string): string[] {
+  const chars = [...line];
+  const cells: string[] = [];
+  let i = 0;
+  while (i < chars.length) {
+    const ch = chars[i] ?? '';
+    if (/[0-9]/.test(ch)) {
+      const next = chars[i + 1] ?? '';
+      if (/[0-9]/.test(next)) {
+        cells.push(ch + next);
+        i += 2;
+        continue;
+      }
+    }
+    cells.push(ch);
+    i += 1;
+  }
+  return cells;
+}
