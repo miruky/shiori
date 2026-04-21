@@ -3,7 +3,7 @@
 
 import type { Palette } from './palettes';
 import { paletteById, PALETTES } from './palettes';
-import { toVerticalForm, wrapText } from './wrap';
+import { splitCells, toVerticalForm, wrapText } from './wrap';
 
 export type CardLayout = 'horizontal' | 'vertical';
 export type CardSize = 'ogp' | 'square' | 'portrait';
@@ -218,11 +218,16 @@ function verticalBody(spec: CardSpec, width: number, height: number, fg: string)
   const columns = lines
     .map((line, col) => {
       const x = Math.round(right - col * colAdvance - fontSize / 2);
-      const spans = [...line]
-        .map(
-          (ch, i) =>
-            `<tspan x="${x}" y="${Math.round(myTop + (i + 0.85) * fontSize)}">${escapeXml(toVerticalForm(ch))}</tspan>`,
-        )
+      const spans = splitCells(line)
+        .map((cell, i) => {
+          const y = Math.round(myTop + (i + 0.85) * fontSize);
+          if (cell.length > 1) {
+            // 縦中横。横に寝かせた2桁を、1セル幅へ少し詰めて収める。
+            const size = Math.round(fontSize * 0.72);
+            return `<tspan x="${x}" y="${y}" font-size="${size}" textLength="${fontSize}" lengthAdjust="spacingAndGlyphs">${escapeXml(cell)}</tspan>`;
+          }
+          return `<tspan x="${x}" y="${y}">${escapeXml(toVerticalForm(cell))}</tspan>`;
+        })
         .join('');
       return `<text font-size="${fontSize}" fill="${fg}" text-anchor="middle">${spans}</text>`;
     })

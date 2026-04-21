@@ -67,6 +67,12 @@ describe('buildCard', () => {
     expect(svg).not.toContain('>。<');
   });
 
+  it('縦書きの2桁数字は縦中横として一つのtspanに収める', () => {
+    const svg = buildCard({ ...base, layout: 'vertical', quote: 'は12時' });
+    expect(svg).toContain('>12</tspan>');
+    expect(svg.match(/<tspan/g)).toHaveLength(3);
+  });
+
   it('出典が空なら出典行を出さない', () => {
     const svg = buildCard({ ...base, title: '', author: '' });
     expect(svg).not.toContain('―');
